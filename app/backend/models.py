@@ -68,6 +68,7 @@ class Ticket(db.Model):
     sev_id = db.Column(db.Integer, db.ForeignKey("severities.id"), nullable=False)
     ai_explaination = db.Column(db.Text)
     created_at = db.Column(db.DateTime, nullable=False, server_default=db.func.current_timestamp())
+    replied_at = db.Column(db.DateTime)
     resolved_at = db.Column(db.DateTime)
 
     requestor = db.relationship("Requester")
@@ -84,6 +85,7 @@ class Ticket(db.Model):
             "sev_id": self.sev_id,
             "ai_explaination": self.ai_explaination,
             "created_at": self.created_at.isoformat() if self.created_at else None,
+            "replied_at": self.replied_at.isoformat() if self.replied_at else None,
             "resolved_at": self.resolved_at.isoformat() if self.resolved_at else None
         }
 
