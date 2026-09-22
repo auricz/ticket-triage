@@ -132,13 +132,13 @@ def login():
 @auth_required
 def get_departments():
     departments = Department.query.all()
-    return [dep.name for dep in departments]
+    return jsonify([dep.to_dict() for dep in departments])
 
 @app.route('/severities', methods=['GET'])
 @auth_required
 def get_severities():
     severities = Severity.query.all()
-    return [sev.name for sev in severities]
+    return jsonify([sev.to_dict() for sev in severities])
 
 @app.route('/tickets', methods=['POST'])
 @auth_required
@@ -285,7 +285,11 @@ def reply_ticket(ticket_id):
     if ticket.replied_at is not None:
         return jsonify({"error": "Ticket has already been replied to"}), 400
 
-    ticket.replied_at = datetime.now()
+    # Use the DB's own clock (not Python's) so this always satisfies the
+    # replied_at <= CURRENT_TIMESTAMP check: CURRENT_TIMESTAMP is frozen to
+    # the transaction's start, and a Python-side timestamp taken after that
+    # point would otherwise fall a few milliseconds later than it.
+    ticket.replied_at = db.func.now()
     _record_audit(ticket.id, "replied")
     db.session.commit()
 
@@ -301,7 +305,7 @@ def resolve_ticket(ticket_id):
     if ticket.resolved_at is not None:
         return jsonify({"error": "Ticket has already been resolved"}), 400
 
-    ticket.resolved_at = datetime.now()
+    ticket.resolved_at = db.func.now()
     _record_audit(ticket.id, "resolved")
     db.session.commit()
 
