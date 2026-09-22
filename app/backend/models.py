@@ -68,6 +68,7 @@ class Ticket(db.Model):
     sev_id = db.Column(db.Integer, db.ForeignKey("severities.id"), nullable=False)
     ai_explaination = db.Column(db.Text)
     created_at = db.Column(db.DateTime, nullable=False, server_default=db.func.current_timestamp())
+    resolved_at = db.Column(db.DateTime)
 
     requestor = db.relationship("Requester")
     assigned_team = db.relationship("Department")
@@ -82,7 +83,8 @@ class Ticket(db.Model):
             "assigned_team_id": self.assigned_team_id,
             "sev_id": self.sev_id,
             "ai_explaination": self.ai_explaination,
-            "created_at": self.created_at.isoformat() if self.created_at else None
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "resolved_at": self.resolved_at.isoformat() if self.resolved_at else None
         }
 
 class AuditLog(db.Model):

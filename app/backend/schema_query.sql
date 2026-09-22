@@ -32,7 +32,8 @@ CREATE TABLE tickets (
     assigned_team_id INT REFERENCES departments(id) NOT NULL,
     sev_id INT REFERENCES severities(id) NOT NULL,
     ai_explaination TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    resolved_at TIMESTAMP
 );
 
 CREATE TABLE audit_logs (

@@ -5,6 +5,7 @@ import argon2
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
 from flask import Flask, g, jsonify, request
+from flask_socketio import SocketIO
 from functools import wraps
 import jwt
 
