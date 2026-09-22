@@ -43,25 +43,11 @@ class Severity(db.Model):
             "resolve_time_hours": self.resolve_time_hours
         }
 
-class Requester(db.Model):
-    __tablename__ = "requesters"
-
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(255), nullable=False, unique=True)
-    name = db.Column(db.String(100))
-
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "email": self.email,
-            "name": self.name
-        }
-
 class Ticket(db.Model):
     __tablename__ = "tickets"
 
     id = db.Column(db.Integer, primary_key=True)
-    requestor_id = db.Column(db.Integer, db.ForeignKey("requesters.id"), nullable=False)
+    requestor_email = db.Column(db.String(255), nullable=False)
     email_subject = db.Column(db.String(255))
     email_body = db.Column(db.Text)
     assigned_team_id = db.Column(db.Integer, db.ForeignKey("departments.id"), nullable=False)
@@ -71,14 +57,13 @@ class Ticket(db.Model):
     replied_at = db.Column(db.DateTime)
     resolved_at = db.Column(db.DateTime)
 
-    requestor = db.relationship("Requester")
     assigned_team = db.relationship("Department")
     severity = db.relationship("Severity")
 
     def to_dict(self):
         return {
             "id": self.id,
-            "requestor_id": self.requestor_id,
+            "requestor_email": self.requestor_email,
             "email_subject": self.email_subject,
             "email_body": self.email_body,
             "assigned_team_id": self.assigned_team_id,

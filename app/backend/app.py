@@ -10,7 +10,7 @@ from flask_socketio import SocketIO
 from functools import wraps
 import jwt
 
-from models import db, User, Department, Severity, Requester, Ticket, AuditLog
+from models import db, User, Department, Severity, Ticket, AuditLog
 
 load_dotenv()
 
@@ -161,18 +161,8 @@ def create_ticket():
     if severity is None:
         return jsonify({"error": f"No severity with id {sev_id}"}), 400
 
-    requestor = db.session.execute(
-        db.select(Requester).where(Requester.email == requestor_email)
-    ).scalar_one_or_none()
-    if requestor is None:
-        requestor = Requester()
-        requestor.email = requestor_email
-        requestor.name = data.get('requestor_name')
-        db.session.add(requestor)
-        db.session.flush()
-
     ticket = Ticket()
-    ticket.requestor_id = requestor.id
+    ticket.requestor_email = requestor_email
     ticket.email_subject = data.get('email_subject')
     ticket.email_body = data.get('email_body')
     ticket.assigned_team_id = assigned_team_id
@@ -202,7 +192,7 @@ def get_tickets():
 
     requestor_email = request.args.get('requestor_email')
     if requestor_email:
-        query = query.join(Requester, Ticket.requestor_id == Requester.id).filter(Requester.email == requestor_email)
+        query = query.filter(Ticket.requestor_email == requestor_email)
 
     resolved = request.args.get('resolved')
     if resolved is not None:

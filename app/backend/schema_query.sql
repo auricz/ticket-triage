@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS audit_logs, tickets, requesters, severities, departments, users CASCADE;
+DROP TABLE IF EXISTS audit_logs, tickets, severities, departments, users CASCADE;
 
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
@@ -18,15 +18,9 @@ CREATE TABLE severities (
     resolve_time_hours INT NOT NULL
 );
 
-CREATE TABLE requesters (
-    id SERIAL PRIMARY KEY,
-    email VARCHAR(255) NOT NULL UNIQUE,
-    name VARCHAR(100)
-);
-
 CREATE TABLE tickets (
     id SERIAL PRIMARY KEY,
-    requestor_id INT REFERENCES requesters(id) NOT NULL,
+    requestor_email VARCHAR(255) NOT NULL,
     email_subject VARCHAR(255),
     email_body TEXT,
     assigned_team_id INT REFERENCES departments(id) NOT NULL,
