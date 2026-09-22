@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run test *)",
+      "Bash(npm run lint)",
+      "Bash(npm run build)",
+      "Edit(/**)"
+    ],
+    "deny": [ 
+      "Read(.env)",
+      "Read(*.pdf)",
+      "Read(/**/venv/**)"
+    ]
+  }
+}
