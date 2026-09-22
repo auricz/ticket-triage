@@ -1,7 +1,10 @@
-DROP DATABASE IF EXISTS it_db;
-CREATE DATABASE it_db;
+DROP TABLE IF EXISTS audit_logs, tickets, requesters, severities, departments, users CASCADE;
 
-USE it_db;
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(255) NOT NULL UNIQUE,
+    pw_hash VARCHAR(255) NOT NULL
+);
 
 CREATE TABLE departments (
     id SERIAL PRIMARY KEY,
@@ -32,6 +35,14 @@ CREATE TABLE tickets (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
+CREATE TABLE audit_logs (
+    id SERIAL PRIMARY KEY,
+    ticket_id INT REFERENCES tickets(id) NOT NULL,
+    action VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    created_by INT REFERENCES users(id) NOT NULL
+);
+
 INSERT INTO departments (name) 
 VALUES
   ('IT'),
@@ -48,3 +59,9 @@ VALUES
   ('High', 8, 24),
   ('Med', 24, 72),
   ('Low', 72, 168);
+
+INSERT INTO users (username, pw_hash)
+VALUES
+  ('admin', '$argon2id$v=19$m=65536,t=3,p=4$NTg5TGx4bkJKeFRsYXBCZQ$+LIBPJxZX3K2lUiNwbW9TRwYL4WLAYO0Wrk+9+k3fE8'),
+  ('alice', '$argon2id$v=19$m=65536,t=3,p=4$NTg5TGx4bkJKeFRsYXBCZQ$qjQZ5m/06iE3K0vOPPKaXlXe7dI/Rr7N5mZxtHgycE8'),
+  ('bob', '$argon2id$v=19$m=65536,t=3,p=4$NTg5TGx4bkJKeFRsYXBCZQ$dEgcly+x+doJN2XPesj/ZZGy1jGoQQkVNqgwPY8PrgY')
