@@ -49,6 +49,20 @@ def _request(method: str, path: str, **kwargs) -> requests.Response:
 
 
 @mcp.tool()
+def get_departments() -> list[dict]:
+    """Get every department (team) a ticket can be assigned to, with its ID and name."""
+    response = _request("GET", "/departments")
+    return response.json()
+
+
+@mcp.tool()
+def get_severities() -> list[dict]:
+    """Get every ticket severity level, with its ID, name, and SLA response/resolve times in hours."""
+    response = _request("GET", "/severities")
+    return response.json()
+
+
+@mcp.tool()
 def create_ticket(
     requestor_email: str,
     assigned_team_id: int,

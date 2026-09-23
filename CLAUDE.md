@@ -17,5 +17,5 @@ This fullstack ITSM web app gives internal employees an interactive UI to view t
 
 - `frontend/` - Vue in TypeScript
 - `backend/` - Flask with PostgreSQL database
-- `mcp/` - Python 
+- `mcp/` - Python and Claude Agent SDK
 - `triage/` - Python, Gmail, and Jira
