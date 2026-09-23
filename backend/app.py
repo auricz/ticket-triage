@@ -180,7 +180,7 @@ def create_ticket():
 @app.route('/tickets', methods=['GET'])
 @auth_required
 def get_tickets():
-    query = Ticket.query
+    query = Ticket.query.filter(Ticket.resolved_at.is_(None))
 
     team = request.args.get('team')
     if team:
@@ -194,10 +194,10 @@ def get_tickets():
     if requestor_email:
         query = query.filter(Ticket.requestor_email == requestor_email)
 
-    resolved = request.args.get('resolved')
-    if resolved is not None:
-        is_resolved = resolved.lower() == 'true'
-        query = query.filter(Ticket.resolved_at.isnot(None) if is_resolved else Ticket.resolved_at.is_(None))
+    replied = request.args.get('replied')
+    if replied is not None:
+        is_replied = replied.lower() == 'true'
+        query = query.filter(Ticket.replied_at.isnot(None) if is_replied else Ticket.replied_at.is_(None))
 
     created_after = request.args.get('created_after')
     if created_after:
