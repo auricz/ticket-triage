@@ -1,4 +1,6 @@
+import re
 from base64 import b64decode
+from html.parser import HTMLParser
 from os import path, getenv
 from typing import Iterator
 
@@ -16,6 +18,61 @@ SCOPES = [
     "https://www.googleapis.com/auth/gmail.readonly",   # Read emails
     "https://www.googleapis.com/auth/gmail.modify"      # Mark email as read
 ]
+
+
+class _VisibleTextParser(HTMLParser):
+    """Collects the text of an HTML document that a reader would actually see,
+    ignoring tags, comments, and non-rendered elements like <script> and <style>."""
+
+    # Elements whose contents are never rendered to the reader
+    HIDDEN_TAGS = {'script', 'style', 'head', 'title', 'noscript', 'template'}
+
+    # Elements that start on a new line when rendered
+    BLOCK_TAGS = {
+        'address', 'article', 'aside', 'blockquote', 'br', 'dd', 'div', 'dl',
+        'dt', 'footer', 'form', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'header',
+        'hr', 'li', 'main', 'nav', 'ol', 'p', 'pre', 'section', 'table', 'tr',
+        'ul',
+    }
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)  # Decode entities like &amp;
+        self.chunks = []
+        self.hidden_depth = 0
+
+    def handle_starttag(self, tag, attrs):
+        if tag in self.HIDDEN_TAGS:
+            self.hidden_depth += 1
+        elif tag in self.BLOCK_TAGS:
+            self.chunks.append('\n')
+        elif tag in ('td', 'th'):
+            self.chunks.append(' ')
+
+    def handle_endtag(self, tag):
+        if tag in self.HIDDEN_TAGS:
+            self.hidden_depth = max(0, self.hidden_depth - 1)
+        elif tag in self.BLOCK_TAGS:
+            self.chunks.append('\n')
+
+    def handle_data(self, data):
+        if self.hidden_depth == 0:
+            self.chunks.append(data)
+
+    def get_text(self) -> str:
+        text = ''.join(self.chunks).replace('\xa0', ' ')
+        # Collapse runs of spaces/tabs, trim each line, and drop extra blank lines
+        lines = (re.sub(r'[ \t\r\f\v]+', ' ', line).strip() for line in text.split('\n'))
+        text = '\n'.join(lines)
+        return re.sub(r'\n{3,}', '\n\n', text).strip()
+
+
+def html_to_text(html: str) -> str:
+    """Convert an HTML email body into the plain text visible to the reader."""
+    parser = _VisibleTextParser()
+    parser.feed(html)
+    parser.close()
+    return parser.get_text()
+
 
 class GmailService(EmailService):
 
@@ -69,10 +126,12 @@ class GmailService(EmailService):
 
                 # The Body of the message is in Base64 format, and may be nested
                 # inside multipart/alternative or multipart/mixed parts, or absent
-                # entirely (e.g. an attachment-only message). Prefer HTML, fall
-                # back to plain text.
+                # entirely (e.g. an attachment-only message). Prefer HTML (with
+                # tags stripped down to the visible text), fall back to plain text.
                 body = self._find_body(payload, 'text/html')
-                if body is None:
+                if body is not None:
+                    body = html_to_text(body)
+                else:
                     body = self._find_body(payload, 'text/plain')
 
                 yield Email(sender, subject, body, id=msg_id)

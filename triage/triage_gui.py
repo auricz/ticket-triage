@@ -13,7 +13,7 @@ PROMPT_TEMP = f"""{SYSTEM_PROMPT}
 
 Do not ask any clarifying questions or any follow-up. Just use the tools and make the tickets/issues.
 
-Next line is the subject, and the line after is the body."""
+Following lines are the sender, subject, and body."""
 
 email_service: EmailService = GmailService()
 
@@ -27,7 +27,6 @@ while True:
         try:
             # Cycle through windows (on Windows) to find Claude Desktop
             claude_focus = False
-            print("Finding Claude Desktop...")
             while not claude_focus:
                 sleep(1)
                 try:
@@ -40,20 +39,21 @@ while True:
                     claude_focus = True
                 except:
                     pass
-
-            # Claude Desktop, start new chat
-            print("Found Claude Desktop!")
-            
-            # Make and paste the prompt
-            prompt = f"{PROMPT_TEMP}\n{unread_email.subject}\n{unread_email.body}"
-            print(prompt)
+          
+            # Make and paste the prompt into Claude Desktop
+            prompt = f"{PROMPT_TEMP}\n{unread_email.sender}\n{unread_email.subject}\n{unread_email.body}"
             copy(prompt)
             
             pyautogui.hotkey('ctrl', 'n')
             pyautogui.hotkey('ctrl', 'v')
+            pyautogui.press('enter')
+
+            print(f"Sent \"{unread_email.subject}\" to Claude Desktop")
+            print()
 
             email_service.mark_as_read(unread_email)
             processed_any = True
+
         except Exception as e:
             # Leave the email unread so it is retried on the next poll
             print(f"Failed to triage email {unread_email.id}: {e}")
