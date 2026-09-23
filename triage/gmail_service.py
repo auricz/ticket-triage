@@ -1,5 +1,6 @@
 from base64 import b64decode
 from os import path, getenv
+from typing import Iterator
 
 from dotenv import load_dotenv
 from google.auth.transport.requests import Request
@@ -7,7 +8,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 
-from email_service import Email
+from email_service import Email, EmailService
 
 load_dotenv()
 
@@ -16,7 +17,7 @@ SCOPES = [
     "https://www.googleapis.com/auth/gmail.modify"      # Mark email as read
 ]
 
-class GmailIterator():
+class GmailService(EmailService):
 
     service = None
     unreads = []
@@ -42,12 +43,19 @@ class GmailIterator():
 
         self.service = build('gmail', 'v1', credentials=creds)
 
-    def get_unread_emails(self):
+    def __iter__(self) -> Iterator:
+        self._get_unread_emails()
+        return iter(self.unreads)
+
+    def mark_as_read(self, email: Email):
+        raise NotImplementedError
+
+    def _get_unread_emails(self):
         try:
             if self.service is None:
                 raise Exception("Service object is None!")
             
-            results = self.service.users().messages().list(userId='me').execute()
+            results = self.service.users().messages().list(userId='me', q='is:unread').execute()
             messages = results.get('messages', [])
 
             unreads = []
@@ -80,7 +88,7 @@ class GmailIterator():
                 # Printing the subject, sender's email and message
                 unreads.append(Email(sender, subject, body))
 
-            return unreads
+            self.unreads = unreads
 
         except Exception as e:
             print(f"An error occurred: {e}")
