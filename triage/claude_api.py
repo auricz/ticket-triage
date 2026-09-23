@@ -5,5 +5,6 @@ email_service: EmailService = GmailService()
 
 for unread_email in email_service:
     print(unread_email)
+    print()
 
-    # email_service.mark_as_read(unread_email)
+    email_service.mark_as_read(unread_email)

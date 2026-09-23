@@ -20,7 +20,6 @@ SCOPES = [
 class GmailService(EmailService):
 
     service = None
-    unreads = []
 
     def __init__(self):
         creds = None
@@ -33,7 +32,7 @@ class GmailService(EmailService):
                 creds.refresh(Request())
             else:
                 flow = InstalledAppFlow.from_client_secrets_file(
-                    getenv("PATH_TO_SECRET"), SCOPES
+                    getenv("PATH_TO_GCP_OAUTH_SECRET"), SCOPES
                 )
                 creds = flow.run_local_server(port=0)
             
@@ -44,22 +43,13 @@ class GmailService(EmailService):
         self.service = build('gmail', 'v1', credentials=creds)
 
     def __iter__(self) -> Iterator:
-        self._get_unread_emails()
-        return iter(self.unreads)
-
-    def mark_as_read(self, email: Email):
-        raise NotImplementedError
-
-    def _get_unread_emails(self):
         try:
             if self.service is None:
                 raise Exception("Service object is None!")
-            
+
             results = self.service.users().messages().list(userId='me', q='is:unread').execute()
             messages = results.get('messages', [])
 
-            unreads = []
-            
             for msg_id in map(lambda m: m['id'], messages):
 
                 msg = self.service.users().messages().get(userId='me', id=msg_id).execute()
@@ -85,13 +75,18 @@ class GmailService(EmailService):
                 if body is None:
                     body = self._find_body(payload, 'text/plain')
 
-                # Printing the subject, sender's email and message
-                unreads.append(Email(sender, subject, body))
-
-            self.unreads = unreads
+                yield Email(sender, subject, body, id=msg_id)
 
         except Exception as e:
             print(f"An error occurred: {e}")
+
+    def mark_as_read(self, email: Email):
+        if self.service is None:
+            raise Exception("Service object is None!")
+
+        self.service.users().messages().modify(
+            userId='me', id=email.id, body={'removeLabelIds': ['UNREAD']}
+        ).execute()
 
     
     def _find_body(self, payload, mime_type='text/html'):
