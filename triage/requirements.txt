@@ -1,5 +1,8 @@
-claude-agent-sdk
-google-api-python-client
-google-auth-httplib2
-google-auth-oauthlib
-python-dotenv
+claude-agent-sdk==0.2.158
+google-api-python-client==2.200.0
+google-auth-httplib2==0.4.2
+google-auth-oauthlib==1.4.1
+python-dotenv==1.2.3
+PyAutoGUI==0.9.54
+pyperclip==1.11.0
+opencv-python==5.0.0.93
