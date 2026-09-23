@@ -8,13 +8,12 @@ This fullstack ITSM web app gives internal employees an interactive UI to view t
 
 ## Key Directories
 
-- `app/` - Fullstack web app for storing and displaying tickets. Authenticate using JWT.
-  - `frontend/` - Frontend. It is a table of tickets updated in real-time, and there are options to filter the table.
-  - `backend/` - Backend. Handles HTTP requests and WebSocket connections, and makes queries to database.
+- `frontend/` - Fullstack ITSM app frontend. It is a table of tickets updated in real-time, and there are options to filter the table.
+- `backend/` - Fullstack ITSM app backend. Handles HTTP requests and WebSocket connections, and makes queries to database.
 - `triage/` - Contains scripts to listen for emails and automatically triage it as either a ticket to the fullstack app or to Jira. 
 
 ## Technologies / Languages
 
-- `app/frontend/` - Vue in TypeScript
-- `app/backend/` - Flask with PostgreSQL database
+- `frontend/` - Vue in TypeScript
+- `backend/` - Flask with PostgreSQL database
 - `triage/` - Python, Gmail, and Jira

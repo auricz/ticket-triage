@@ -42,7 +42,7 @@ class GmailService(EmailService):
 
         self.service = build('gmail', 'v1', credentials=creds)
 
-    def __iter__(self) -> Iterator:
+    def __iter__(self) -> Iterator[Email]:
         try:
             if self.service is None:
                 raise Exception("Service object is None!")
