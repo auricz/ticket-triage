@@ -103,13 +103,13 @@ def get_tickets(
     page: int = 1,
     per_page: int = 25,
 ) -> dict:
-    """Get tickets, optionally filtered.
+    """Get unresolved tickets, optionally filtered. Resolved tickets are never returned.
 
     Args:
         team: Filter by assigned team/department name.
         severity: Filter by severity name.
         requestor_email: Filter by the requestor's email address.
-        replied: Filter by whether the ticket has been replied.
+        replied: Filter by whether the ticket has been replied to.
         created_after: Only include tickets created at or after this ISO 8601 timestamp.
         created_before: Only include tickets created at or before this ISO 8601 timestamp.
         page: Page number to return.
@@ -125,7 +125,7 @@ def get_tickets(
         "per_page": per_page,
     }
     if replied is not None:
-        params["resolved"] = str(replied).lower()
+        params["replied"] = str(replied).lower()
 
     response = _request("GET", "/tickets", params=params)
     return response.json()

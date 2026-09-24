@@ -5,7 +5,7 @@ import FilterBar from '../components/FilterBar.vue'
 import { useNow } from '../composables/useNow'
 import { useAuthStore } from '../stores/auth'
 import { useTicketStore } from '../stores/tickets'
-import { formatRemaining, isFullyDone, replyDeadline, resolveDeadline, urgencyTimestamp } from '../utils/sla'
+import { formatRemaining, replyDeadline, resolveDeadline, urgencyTimestamp } from '../utils/sla'
 import { severityClass } from '../utils/severity'
 
 const TOP_N = 10
@@ -22,8 +22,9 @@ const search = ref('')
 const topTickets = computed(() => {
   const query = search.value.trim().toLowerCase()
 
+  // The API only returns unresolved tickets, but live updates can deliver resolved ones
   return ticketStore.tickets
-    .filter((ticket) => !isFullyDone(ticket))
+    .filter((ticket) => ticket.resolved_at === null)
     .filter((ticket) => teamFilter.value === null || ticket.assigned_team_id === teamFilter.value)
     .filter((ticket) => severityFilter.value === null || ticket.sev_id === severityFilter.value)
     .filter((ticket) => {
@@ -102,8 +103,7 @@ function handleLogout() {
               </span>
             </td>
             <td>
-              <span v-if="ticket.resolved_at" class="done">Resolved</span>
-              <span v-else :class="{ overdue: resolveDeadline(ticket, severity!).getTime() < now }">
+              <span :class="{ overdue: resolveDeadline(ticket, severity!).getTime() < now }">
                 {{ formatRemaining(resolveDeadline(ticket, severity!), now) }}
               </span>
             </td>

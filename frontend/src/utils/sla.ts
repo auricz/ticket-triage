@@ -8,10 +8,6 @@ export function resolveDeadline(ticket: Ticket, severity: Severity): Date {
   return new Date(new Date(ticket.created_at).getTime() + severity.resolve_time_hours * 3_600_000)
 }
 
-export function isFullyDone(ticket: Ticket): boolean {
-  return ticket.replied_at !== null && ticket.resolved_at !== null
-}
-
 // Soonest deadline among the SLA clocks still pending for this ticket.
 // Used to rank tickets by urgency (least time left first).
 export function urgencyTimestamp(ticket: Ticket, severity: Severity): number {
