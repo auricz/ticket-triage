@@ -7,7 +7,7 @@ import pyautogui
 
 from triage_cli import SYSTEM_PROMPT
 
-POLL_INTERVAL_SECONDS = 5
+POLL_INTERVAL_SECONDS = 3
 
 PROMPT_TEMP = f"""{SYSTEM_PROMPT}
 

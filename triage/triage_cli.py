@@ -19,7 +19,7 @@ from gmail_service import GmailService
 load_dotenv()
 
 MODEL = "claude-haiku-4-5"
-POLL_INTERVAL_SECONDS = 5
+POLL_INTERVAL_SECONDS = 3
 MAX_AGENT_TURNS = 40
 CONFLUENCE_SPACE_KEY = "IS"  # The "IT Support" space
 
